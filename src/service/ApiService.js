@@ -19,12 +19,10 @@ export default class ApiService {
         return response.data;
     }
 
-
     static async loginUser(loginDetails) {
         const response = await axios.post(`${this.BASE_URL}/auth/login`, loginDetails)
         return response.data;
     }
-
 
     static async getLoggedInUserInfo() {
         const response = await axios.get(`${this.BASE_URL}/user/my-info`, {
@@ -32,7 +30,6 @@ export default class ApiService {
         });
         return response.data;
     }
-
 
     /**PRODUCT ENDPOINT */
 
@@ -109,15 +106,21 @@ export default class ApiService {
         })
         return response.data;
     }
-
     static async deleteCategory(categoryId) {
-        const response = await axios.delete(`${this.BASE_URL}/category/delete/${categoryId}`, {
-            headers: this.getHeader()
-        })
-        return response.data;
+        try {
+            const response = await axios.delete(`${this.BASE_URL}/category/delete/${categoryId}`, {
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("authToken")}`  // Assuming you are using a token-based authentication
+                }
+            });
+            return response.data; // Or handle based on your response structure
+        } catch (error) {
+            console.error('Error deleting category:', error);
+            throw error; // Propagate error for further handling in component
+        }
     }
 
-    /**ORDEDR */
+    /**ORDERED */
     static async createOrder(body) {
         const response = await axios.post(`${this.BASE_URL}/order/create`, body, {
             headers: this.getHeader()
@@ -163,10 +166,6 @@ export default class ApiService {
             throw error;  // Pass the error to the calling function
         }
     }
-    
-    
-
-
 
     /**ADDRESS */
     static async saveAddress(body) {
@@ -176,7 +175,7 @@ export default class ApiService {
         return response.data;
     }
 
-    /***AUTHEMNTICATION CHECKER */
+    /***AUTHENTICATION CHECKER */
     static logout(){
         localStorage.removeItem('token')
         localStorage.removeItem('role')
@@ -191,13 +190,12 @@ export default class ApiService {
         const role = localStorage.getItem('role')
         return role === 'ADMIN'
     }
- /** PAYMENT */
- static async chargeCard(paymentDetails) {
-    const response = await axios.post(`${this.BASE_URL}/payment/charge`, paymentDetails, {
-        headers: this.getHeader()
-    });
-    return response.data;
-}
 
-
+    /** PAYMENT */
+    static async chargeCard(paymentDetails) {
+        const response = await axios.post(`${this.BASE_URL}/payment/charge`, paymentDetails, {
+            headers: this.getHeader()
+        });
+        return response.data;
+    }
 }

@@ -27,8 +27,9 @@ const AdminCategoryPage = () => {
         const confirmed = window.confirm("Are you sure you want to delete this category?");
         if (confirmed) {
             try {
+                // Call the API to delete the category
                 await ApiService.deleteCategory(id);
-                fetchCategories();
+                fetchCategories();  // Refresh the category list after deletion
             } catch (error) {
                 console.log("Error deleting category by id", error);
             }
