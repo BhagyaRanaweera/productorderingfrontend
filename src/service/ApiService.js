@@ -100,23 +100,23 @@ export default class ApiService {
         return response.data;
     }
 
+  
     static async updateCategory(categoryId, body) {
         const response = await axios.put(`${this.BASE_URL}/category/update/${categoryId}`, body, {
             headers: this.getHeader()
-        })
+        });
         return response.data;
     }
+
     static async deleteCategory(categoryId) {
         try {
             const response = await axios.delete(`${this.BASE_URL}/category/delete/${categoryId}`, {
-                headers: {
-                    "Authorization": `Bearer ${localStorage.getItem("authToken")}`  // Assuming you are using a token-based authentication
-                }
+                headers: this.getHeader()
             });
-            return response.data; // Or handle based on your response structure
+            return response.data;
         } catch (error) {
-            console.error('Error deleting category:', error);
-            throw error; // Propagate error for further handling in component
+            console.error("Error deleting category:", error.response ? error.response.data : error.message);
+            throw error; // Rethrow the error for handling in the component
         }
     }
 

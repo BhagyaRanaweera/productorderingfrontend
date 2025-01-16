@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import ApiService from "../../service/ApiService";
+import ApiService from "../../service/ApiService"; // Ensure this service has the necessary methods
 import { useNavigate } from "react-router-dom";
 
 const AdminCategoryPage = () => {
     const [categories, setCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [categoryName, setCategoryName] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -19,20 +21,30 @@ const AdminCategoryPage = () => {
         }
     };
 
-    const handleEdit = async (id) => {
-        navigate(`/admin/edit-category/${id}`);
+    const handleEdit = (category) => {
+        setSelectedCategory(category);
+        setCategoryName(category.name);
     };
 
-    const handleDelete = async (id) => {
-        const confirmed = window.confirm("Are you sure you want to delete this category?");
-        if (confirmed) {
-            try {
-                // Call the API to delete the category
-                await ApiService.deleteCategory(id);
-                fetchCategories();  // Refresh the category list after deletion
-            } catch (error) {
-                console.log("Error deleting category by id", error);
-            }
+    const handleUpdate = async () => {
+        if (!selectedCategory) return;
+
+        try {
+            await ApiService.updateCategory(selectedCategory.id, { name: categoryName });
+            fetchCategories(); // Refresh the list
+            setSelectedCategory(null);
+            setCategoryName('');
+        } catch (error) {
+            console.error('Error updating category:', error);
+        }
+    };
+
+    const handleDelete = async (categoryId) => {
+        try {
+            await ApiService.deleteCategory(categoryId);
+            fetchCategories(); // Refresh the list
+        } catch (error) {
+            console.error('Error deleting category:', error);
         }
     };
 
@@ -52,7 +64,7 @@ const AdminCategoryPage = () => {
                         <div className="space-x-2">
                             <button 
                                 className="bg-yellow-500 text-white font-semibold py-1 px-3 rounded-lg hover:bg-yellow-600 transition duration-200" 
-                                onClick={() => handleEdit(category.id)}
+                                onClick={() => handleEdit(category)}
                             >
                                 Edit
                             </button>
@@ -66,6 +78,33 @@ const AdminCategoryPage = () => {
                     </li>
                 ))}
             </ul>
+
+            {selectedCategory && (
+                <div className="mt-6">
+                    <h3 className="text-xl font-semibold">Edit Category</h3>
+                    <input
+                        type="text"
+                        value={categoryName}
+                        onChange={(e) => setCategoryName(e.target.value)}
+                        className="border rounded-lg p-2 w-full"
+                    />
+                    <button 
+                        onClick={handleUpdate}
+                        className="mt-2 bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 transition duration-200"
+                    >
+                        Update Category
+                    </button>
+                    <button 
+                        onClick={() => {
+                            setSelectedCategory(null);
+                            setCategoryName('');
+                        }}
+                        className="mt-2 ml-2 bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-200"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
