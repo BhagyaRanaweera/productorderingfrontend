@@ -1,5 +1,7 @@
+// eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button, Typography, Card, CardContent, Divider, Grid, Box, CircularProgress } from "@mui/material";
 import ApiService from "../../service/ApiService";
 import Pagination from "../common/Pagination";
 
@@ -24,7 +26,7 @@ const ProfilePage = () => {
     };
 
     if (!userInfo) {
-        return <div className="text-center text-gray-500">Loading...</div>;
+        return <Box display="flex" justifyContent="center" alignItems="center" height="100vh"><CircularProgress /></Box>;
     }
 
     const handleAddressClick = () => {
@@ -39,64 +41,82 @@ const ProfilePage = () => {
     );
 
     return (
-        <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
-            <h2 className="text-2xl font-bold mb-4">Welcome {userInfo.name}</h2>
+        <Box sx={{ maxWidth: 800, margin: "auto", padding: 4 }}>
+            <Typography variant="h4" gutterBottom>Welcome, {userInfo.name}</Typography>
 
-            {error ? (
-                <p className="text-red-500">{error}</p>
-            ) : (
-                <div>
-                    <p><strong>Name: </strong>{userInfo.name}</p>
-                    <p><strong>Email: </strong>{userInfo.email}</p>
-                    <p><strong>Phone Number: </strong>{userInfo.phoneNumber}</p>
+            {error && <Typography color="error">{error}</Typography>}
 
-                    <div className="mt-4">
-                        <h3 className="text-lg font-semibold">Address</h3>
-                        {userInfo.address ? (
-                            <div className="mt-2">
-                                <p><strong>Street: </strong>{userInfo.address.street}</p>
-                                <p><strong>City: </strong>{userInfo.address.city}</p>
-                                <p><strong>State: </strong>{userInfo.address.state}</p>
-                                <p><strong>Zip Code: </strong>{userInfo.address.zipCode}</p>
-                                <p><strong>Country: </strong>{userInfo.address.country}</p>
-                            </div>
-                        ) : (
-                            <p>No Address information available</p>
-                        )}
-                        <button 
-                            className="mt-2 bg-blue-500 text-white font-semibold py-2 px-4 rounded hover:bg-blue-600 transition duration-200" 
-                            onClick={handleAddressClick}
-                        >
-                            {userInfo.address ? "Edit Address" : "Add Address"}
-                        </button>
-                    </div>
+            <Card sx={{ marginBottom: 3 }}>
+                <CardContent>
+                    <Typography variant="h6">User Information</Typography>
+                    <Divider sx={{ margin: "16px 0" }} />
+                    <Typography><strong>Name:</strong> {userInfo.name}</Typography>
+                    <Typography><strong>Email:</strong> {userInfo.email}</Typography>
+                    <Typography><strong>Phone Number:</strong> {userInfo.phoneNumber}</Typography>
+                </CardContent>
+            </Card>
 
-                    <h3 className="text-lg font-semibold mt-4">Order History</h3>
-                    <ul className="mt-2">
+            <Card sx={{ marginBottom: 3 }}>
+                <CardContent>
+                    <Typography variant="h6">Address</Typography>
+                    <Divider sx={{ margin: "16px 0" }} />
+                    {userInfo.address ? (
+                        <div>
+                            <Typography><strong>Street:</strong> {userInfo.address.street}</Typography>
+                            <Typography><strong>City:</strong> {userInfo.address.city}</Typography>
+                            <Typography><strong>State:</strong> {userInfo.address.state}</Typography>
+                            <Typography><strong>Zip Code:</strong> {userInfo.address.zipCode}</Typography>
+                            <Typography><strong>Country:</strong> {userInfo.address.country}</Typography>
+                        </div>
+                    ) : (
+                        <Typography>No Address information available</Typography>
+                    )}
+                    <Button 
+                        variant="contained" 
+                        color="primary" 
+                        sx={{ marginTop: 2 }} 
+                        onClick={handleAddressClick}
+                    >
+                        {userInfo.address ? "Edit Address" : "Add Address"}
+                    </Button>
+                </CardContent>
+            </Card>
+
+            <Card sx={{ marginBottom: 3 }}>
+                <CardContent>
+                    <Typography variant="h6">Order History</Typography>
+                    <Divider sx={{ margin: "16px 0" }} />
+                    <Grid container spacing={2}>
                         {paginatedOrders.map(order => (
-                            <li key={order.id} className="flex items-center border-b py-2">
-                                <img 
-                                    src={order.product?.imageUrl || "/images/placeholder.png"} 
-                                    alt={order.product.name} 
-                                    className="w-16 h-16 object-cover rounded-md mr-4" 
-                                />
-                                <div>
-                                    <p><strong>Name: </strong>{order.product.name}</p>
-                                    <p><strong>Status: </strong>{order.status}</p>
-                                    <p><strong>Quantity: </strong>{order.quantity}</p>
-                                    <p><strong>Price: </strong>${order.price.toFixed(2)}</p>
-                                </div>
-                            </li>
+                            <Grid item xs={12} sm={6} md={4} key={order.id}>
+                                <Card>
+                                    <CardContent>
+                                        <Box display="flex" alignItems="center">
+                                            <img 
+                                                src={order.product?.imageUrl || "/images/placeholder.png"} 
+                                                alt={order.product.name} 
+                                                style={{ width: 60, height: 60, objectFit: "cover", borderRadius: "8px", marginRight: 16 }} 
+                                            />
+                                            <div>
+                                                <Typography variant="subtitle1">{order.product.name}</Typography>
+                                                <Typography variant="body2" color="textSecondary">Status: {order.status}</Typography>
+                                                <Typography variant="body2" color="textSecondary">Quantity: {order.quantity}</Typography>
+                                                <Typography variant="body2" color="textSecondary">Price: ${order.price.toFixed(2)}</Typography>
+                                            </div>
+                                        </Box>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
                         ))}
-                    </ul>
+                    </Grid>
                     <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}
                         onPageChange={(page) => setCurrentPage(page)}
                     />
-                </div>
-            )}
-        </div>
+                </CardContent>
+            </Card>
+        </Box>
     );
 };
 

@@ -48,9 +48,7 @@ const Footer = () => {
               <img src={footerLogo} alt="" className="max-w-[50px]" />
               ModishMart
             </h1>
-            <p>
-              Your One-Stop Shop for Everything You Love!
-            </p>
+            <p>Your One-Stop Shop for Everything You Love!</p>
           </div>
 
           {/* Footer Links */}
@@ -66,33 +64,30 @@ const Footer = () => {
                       className="cursor-pointer hover:text-primary hover:translate-x-1 duration-300 text-gray-200"
                       key={link.title}
                     >
-                      <span>{link.title}</span>
+                      <a href={link.link}>
+                        <span>{link.title}</span>
+                      </a>
                     </li>
                   ))}
                 </ul>
               </div>
             </div>
-            
-            
 
             {/* social links */}
-
             <div>
               <div className="flex items-center gap-3 mt-6">
-                <a href="#">
+                <a href="https://www.instagram.com/yourprofile" target="_blank" rel="noopener noreferrer">
                   <FaInstagram className="text-3xl" />
                 </a>
-                <a href="#">
+                <a href="https://www.facebook.com/yourprofile" target="_blank" rel="noopener noreferrer">
                   <FaFacebook className="text-3xl" />
                 </a>
-                <a href="#">
-                  <FaLinkedin className="text-3xl" />
-                </a>
+               
               </div>
               <div className="mt-6">
                 <div className="flex items-center gap-3">
                   <FaLocationArrow />
-                  <p>No.30,Lotus Road,Colombo 4</p>
+                  <p>No.30, Lotus Road, Colombo 4</p>
                 </div>
                 <div className="flex items-center gap-3 mt-3">
                   <FaMobileAlt />

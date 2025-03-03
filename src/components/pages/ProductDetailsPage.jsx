@@ -3,6 +3,25 @@ import { useParams } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import ApiService from "../../service/ApiService";
 
+// Function to render stars based on the rating value
+const renderStars = (rating) => {
+  const fullStars = Math.floor(rating); // Full stars based on the integer part of rating
+  const halfStar = rating % 1 !== 0; // Half star if there is a fractional part
+  const emptyStars = 5 - fullStars - (halfStar ? 1 : 0); // Empty stars
+
+  return (
+    <>
+      {[...Array(fullStars)].map((_, index) => (
+        <span key={`full-${index}`} className="text-yellow-400">★</span>
+      ))}
+      {halfStar && <span className="text-yellow-400">★</span>}
+      {[...Array(emptyStars)].map((_, index) => (
+        <span key={`empty-${index}`} className="text-gray-300">★</span>
+      ))}
+    </>
+  );
+};
+
 const ProductDetailsPage = () => {
     const { productId } = useParams();
     const { cart, dispatch } = useCart();
@@ -52,10 +71,37 @@ const ProductDetailsPage = () => {
 
     return (
         <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
-            <img src={product?.imageUrl} alt={product?.name} className="w-full h-64 object-cover rounded-md" />
-            <h1 className="text-3xl font-bold mt-4">{product?.name}</h1>
-            <p className="mt-2 text-gray-700">{product?.description}</p>
+            {/* Product Image */}
+            <img src={`https://product-ecommerce.s3.eu-north-1.amazonaws.com/${product.imageUrl}`} alt={product.name} className="w-full h-64 object-cover rounded-md" />
+            
+            {/* Product Title */}
+            <h1 className="text-3xl font-bold mt-4">{product.name}</h1>
+            
+            {/* Product Description */}
+            <p className="mt-2 text-gray-700">{product.description}</p>
+            
+            {/* Product Rating */}
+            <div className="flex items-center mt-2">
+                <span className="text-yellow-400">{renderStars(product.rating)}</span>
+                <span className="ml-2 text-sm text-gray-500">({product.rating.toFixed(1)})</span>
+            </div>
+            
+            {/* Price */}
             <span className="block mt-4 text-xl font-semibold">${product.price.toFixed(2)}</span>
+            
+            {/* Availability */}
+            <p className={`mt-2 font-semibold ${product.availability ? 'text-green-500' : 'text-red-500'}`}>
+                {product.availability ? 'In Stock' : 'Out of Stock'}
+            </p>
+            
+            {/* Promotions */}
+            {product.promotion && (
+                <p className="mt-2 text-red-500 font-bold">
+                    {product.promotion}
+                </p>
+            )}
+
+            {/* Cart Actions */}
             {cartItem ? (
                 <div className="flex items-center mt-4">
                     <button 
