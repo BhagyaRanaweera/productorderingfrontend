@@ -1,116 +1,102 @@
-import React, { useState } from "react";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
 import ApiService from "../../service/ApiService";
+import { TextField, Button, Container, Typography, Box, Alert } from "@mui/material";
+
+const schema = yup.object().shape({
+  email: yup.string().email("Invalid email").required("Email is required"),
+  name: yup.string().min(3, "Name must be at least 3 characters").required("Name is required"),
+  phoneNumber: yup
+    .string()
+    .matches(/^\d{10}$/, "Phone number must be 10 digits")
+    .required("Phone number is required"),
+  password: yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
+});
 
 const RegisterPage = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    name: '',
-    phoneNumber: '',
-    password: ''
-  });
-
-  const [message, setMessage] = useState(null);
   const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({ resolver: yupResolver(schema) });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+  const [message, setMessage] = React.useState(null);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     try {
-      const response = await ApiService.registerUser(formData);
+      const response = await ApiService.registerUser(data);
       if (response.status === 200) {
-        setMessage("User Successfully Registered");
-        setTimeout(() => {
-          navigate("/login");
-        }, 4000);
+        setMessage({ type: "success", text: "User Successfully Registered" });
+        setTimeout(() => navigate("/login"), 3000);
       }
     } catch (error) {
-      setMessage(error.response?.data.message || error.message || "Unable to register a user");
+      setMessage({
+        type: "error",
+        text: error.response?.data.message || "Unable to register a user",
+      });
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-300 via-purple-400 to-indigo-500 flex items-center justify-center p-6">
-      <div className="w-full max-w-md bg-white p-8 shadow-2xl rounded-lg">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Create an Account</h2>
-        {message && (
-          <p className={`text-center text-sm mb-4 ${message.includes("Successfully") ? "text-green-500" : "text-red-500"}`}>
-            {message}
-          </p>
-        )}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-gray-700 font-medium mb-1" htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-medium mb-1" htmlFor="name">Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-medium mb-1" htmlFor="phoneNumber">Phone Number</label>
-            <input
-              type="text"
-              id="phoneNumber"
-              name="phoneNumber"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-              required
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-medium mb-1" htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
-
-          <button
+    <Container maxWidth="sm">
+      <Box sx={{ mt: 5, p: 3, boxShadow: 3, borderRadius: 2, bgcolor: "white" }}>
+        <Typography variant="h4" align="center" gutterBottom>
+          Create an Account
+        </Typography>
+        {message && <Alert severity={message.type}>{message.text}</Alert>}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <TextField
+            label="Email"
+            fullWidth
+            margin="normal"
+            {...register("email")}
+            error={!!errors.email}
+            helperText={errors.email?.message}
+          />
+          <TextField
+            label="Name"
+            fullWidth
+            margin="normal"
+            {...register("name")}
+            error={!!errors.name}
+            helperText={errors.name?.message}
+          />
+          <TextField
+            label="Phone Number"
+            fullWidth
+            margin="normal"
+            {...register("phoneNumber")}
+            error={!!errors.phoneNumber}
+            helperText={errors.phoneNumber?.message}
+          />
+          <TextField
+            label="Password"
+            type="password"
+            fullWidth
+            margin="normal"
+            {...register("password")}
+            error={!!errors.password}
+            helperText={errors.password?.message}
+          />
+          <Button
             type="submit"
-            className="w-full py-3 bg-indigo-500 text-white font-bold rounded-lg shadow-md hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-300 transition duration-300"
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{ mt: 2 }}
           >
             Register
-          </button>
-
-          <p className="text-center text-gray-700 mt-4">
-            Already have an account?{' '}
-            <a href="/login" className="text-indigo-500 font-medium hover:underline">
-              Login
-            </a>
-          </p>
+          </Button>
         </form>
-      </div>
-    </div>
+        <Typography variant="body2" align="center" sx={{ mt: 2 }}>
+          Already have an account? <a href="/login">Login</a>
+        </Typography>
+      </Box>
+    </Container>
   );
 };
 

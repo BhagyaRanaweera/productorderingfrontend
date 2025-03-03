@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Pagination from "../common/Pagination";
+import { Button, Typography, List, ListItem, ListItemText, Snackbar, Alert } from "@mui/material";
+import Pagination from "../common/Pagination"; // Assuming you have a custom Pagination component
 import ApiService from "../../service/ApiService";
 
 const AdminProductPage = () => {
@@ -42,47 +43,67 @@ const AdminProductPage = () => {
         }
     };
 
+    const handleCloseSnackbar = () => {
+        setError(null);
+    };
+
     return (
         <div className="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
-            {error ? (
-                <p className="text-red-500 mb-4">{error}</p>
-            ) : (
-                <div>
-                    <h2 className="text-2xl font-bold mb-4">Products</h2>
-                    <button 
-                        className="mb-4 bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200" 
-                        onClick={() => { navigate('/admin/add-product'); }}
-                    >
-                        Add Product
-                    </button>
-                    <ul className="space-y-2">
-                        {products.map((product) => (
-                            <li key={product.id} className="flex justify-between items-center border-b py-2">
-                                <span className="text-lg">{product.name}</span>
-                                <div className="space-x-2">
-                                    <button 
-                                        className="bg-yellow-500 text-white font-semibold py-1 px-3 rounded-lg hover:bg-yellow-600 transition duration-200" 
-                                        onClick={() => handleEdit(product.id)}
-                                    >
-                                        Edit
-                                    </button>
-                                    <button 
-                                        className="bg-red-500 text-white font-semibold py-1 px-3 rounded-lg hover:bg-red-600 transition duration-200" 
-                                        onClick={() => handleDelete(product.id)}
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={(page) => setCurrentPage(page)}
-                    />
-                </div>
+            {error && (
+                <Snackbar
+                    open={Boolean(error)}
+                    autoHideDuration={6000}
+                    onClose={handleCloseSnackbar}
+                >
+                    <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: "100%" }}>
+                        {error}
+                    </Alert>
+                </Snackbar>
             )}
+
+            <Typography variant="h4" component="h2" gutterBottom>
+                Products
+            </Typography>
+
+            <Button 
+                variant="contained"
+                color="primary"
+                onClick={() => navigate('/admin/add-product')}
+                sx={{ mb: 2 }}
+            >
+                Add Product
+            </Button>
+
+            <List>
+                {products.map((product) => (
+                    <ListItem key={product.id} divider>
+                        <ListItemText primary={product.name} />
+                        <div>
+                            <Button 
+                                variant="outlined" 
+                                color="warning" 
+                                sx={{ mr: 2 }}
+                                onClick={() => handleEdit(product.id)}
+                            >
+                                Edit
+                            </Button>
+                            <Button 
+                                variant="outlined" 
+                                color="error" 
+                                onClick={() => handleDelete(product.id)}
+                            >
+                                Delete
+                            </Button>
+                        </div>
+                    </ListItem>
+                ))}
+            </List>
+
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={(page) => setCurrentPage(page)}
+            />
         </div>
     );
 };

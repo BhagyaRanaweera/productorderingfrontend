@@ -69,10 +69,15 @@ const AdminOrdersPage = () => {
         <div className="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
             <h2 className="text-2xl font-bold mb-4">Orders</h2>
             {error && <p className="text-red-500 mb-4">{error}</p>}
+
             <div className="flex justify-between mb-4">
                 <div className="flex items-center">
                     <label className="mr-2">Filter By Status:</label>
-                    <select value={statusFilter} onChange={handleFilterChange} className="border rounded-md p-2">
+                    <select
+                        value={statusFilter}
+                        onChange={handleFilterChange}
+                        className="border rounded-md p-2"
+                    >
                         <option value="">All</option>
                         {OrderStatus.map(status => (
                             <option key={status} value={status}>{status}</option>
@@ -81,7 +86,11 @@ const AdminOrdersPage = () => {
                 </div>
                 <div className="flex items-center">
                     <label className="mr-2">Search By Status:</label>
-                    <select value={searchStatus} onChange={handleSearchStatusChange} className="border rounded-md p-2">
+                    <select
+                        value={searchStatus}
+                        onChange={handleSearchStatusChange}
+                        className="border rounded-md p-2"
+                    >
                         <option value="">All</option>
                         {OrderStatus.map(status => (
                             <option key={status} value={status}>{status}</option>
@@ -92,26 +101,26 @@ const AdminOrdersPage = () => {
 
             <table className="min-w-full bg-white border border-gray-300">
                 <thead>
-                    <tr>
-                        <th className="border-b py-2 px-4 text-left">Order ID</th>
-                        <th className="border-b py-2 px-4 text-left">Customer</th>
-                        <th className="border-b py-2 px-4 text-left">Status</th>
-                        <th className="border-b py-2 px-4 text-left">Price</th>
-                        <th className="border-b py-2 px-4 text-left">Date Ordered</th>
-                        <th className="border-b py-2 px-4 text-left">Actions</ th>
+                    <tr className="border-b">
+                        <th className="py-2 px-4 text-left">Order ID</th>
+                        <th className="py-2 px-4 text-left">Customer</th>
+                        <th className="py-2 px-4 text-left">Status</th>
+                        <th className="py-2 px-4 text-left">Price</th>
+                        <th className="py-2 px-4 text-left">Date Ordered</th>
+                        <th className="py-2 px-4 text-left">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {filteredOrders.map(order => (
                         <tr key={order.id} className="hover:bg-gray-100">
-                            <td className="border-b py-2 px-4">{order.id}</td>
-                            <td className="border-b py-2 px-4">{order.user.name}</td>
-                            <td className="border-b py-2 px-4">{order.status}</td>
-                            <td className="border-b py-2 px-4">${order.price.toFixed(2)}</td>
-                            <td className="border-b py-2 px-4">{new Date(order.createdAt).toLocaleDateString()}</td>
-                            <td className="border-b py-2 px-4">
-                                <button 
-                                    onClick={() => handleOrderDetails(order.id)} 
+                            <td className="py-2 px-4">{order.id}</td>
+                            <td className="py-2 px-4">{order.user.name}</td>
+                            <td className="py-2 px-4">{order.status}</td>
+                            <td className="py-2 px-4">${order.price.toFixed(2)}</td>
+                            <td className="py-2 px-4">{new Date(order.createdAt).toLocaleDateString()}</td>
+                            <td className="py-2 px-4">
+                                <button
+                                    onClick={() => handleOrderDetails(order.id)}
                                     className="bg-blue-500 text-white font-semibold py-1 px-3 rounded-md hover:bg-blue-600 transition duration-200"
                                 >
                                     Details

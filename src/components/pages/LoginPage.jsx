@@ -1,101 +1,133 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import ApiService from "../../service/ApiService";
-import img from '../../assets/cover.jpg';
+import img from "../../assets/cover.jpg";
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
-
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState({});
   const [message, setMessage] = useState(null);
   const navigate = useNavigate();
 
+  // Validation Function
+  const validate = () => {
+    let tempErrors = {};
+    if (!formData.email) {
+      tempErrors.email = "Email is required.";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      tempErrors.email = "Invalid email format.";
+    }
+    if (!formData.password) {
+      tempErrors.password = "Password is required.";
+    } else if (formData.password.length < 6) {
+      tempErrors.password = "Password must be at least 6 characters.";
+    }
+    setErrors(tempErrors);
+    return Object.keys(tempErrors).length === 0;
+  };
+
+  // Handle Input Changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    setErrors({ ...errors, [name]: "" });
   };
 
+  // Handle Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted with data:", formData); // Debugging
+    if (!validate()) return;
+
     try {
       const response = await ApiService.loginUser(formData);
-      console.log("API Response:", response); // Debugging
       if (response.status === 200) {
-        setMessage("User Successfully Logged in");
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('role', response.role);
-        setTimeout(() => {
-          navigate("/profile");
-        }, 4000);
+        setMessage({ type: "success", text: "Login successful!" });
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("role", response.role);
+        setTimeout(() => navigate("/"), 3000);
       }
     } catch (error) {
-      console.error("Login Error:", error); // Debugging
-      setMessage(error.response?.data.message || error.message || "Unable to login a user");
+      setMessage({ type: "error", text: error.response?.data?.message || "Login failed." });
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-gray-100 to-gray-300 flex items-center justify-center p-6">
-      <div className="flex justify-center items-center w-full max-w-4xl bg-white shadow-2xl rounded-lg">
-        <img className="w-1/2 hidden lg:block rounded-l-lg" src={img} alt="Login illustration" />
-        <div className="w-full lg:w-1/2 p-8">
-          <h2 className="text-3xl font-bold text-center text-indigo-600 mb-6">Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white-900 to-gray-900">
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="relative w-full max-w-3xl bg-opacity-30 bg-white backdrop-blur-md rounded-2xl shadow-2xl p-8 flex items-center"
+      >
+        {/* Left Image Section */}
+        <div className="hidden md:block w-1/2">
+          <img src={img} alt="Login Art" className="rounded-xl w-full h-auto" />
+        </div>
+
+        {/* Right Form Section */}
+        <div className="w-full md:w-1/2 p-6">
+          <h2 className="text-3xl font-extrabold text-white text-center mb-4">Welcome Back</h2>
           {message && (
-            <p className={`text-center mb-4 ${message.includes("Successfully") ? "text-green-500" : "text-red-500"}`}>
-              {message}
-            </p>
+            <motion.p
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className={`text-center mb-4 p-2 rounded-lg text-sm ${
+                message.type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"
+              }`}
+            >
+              {message.text}
+            </motion.p>
           )}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* ---- Input Email ---- */}
+            {/* Email Input */}
             <div>
-              <label className="block text-gray-700 font-medium mb-1" htmlFor="email">
-                Your Email
-              </label>
               <input
-                id="email"
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="Your Email"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                placeholder="Email Address"
+                className="w-full p-3 bg-gray-100 rounded-lg outline-none focus:ring-2 focus:ring-blue-400 text-black"
                 required
               />
+              {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
             </div>
-            {/* ---- Input Password ---- */}
+
+            {/* Password Input */}
             <div>
-              <label className="block text-gray-700 font-medium mb-1" htmlFor="password">
-                Your Password
-              </label>
               <input
-                id="password"
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Your Password"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                placeholder="Password"
+                className="w-full p-3 bg-gray-100 rounded-lg outline-none focus:ring-2 focus:ring-blue-400 text-black"
                 required
               />
+              {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password}</p>}
             </div>
-            <button
+
+            {/* Submit Button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               type="submit"
-              className="w-full py-3 bg-indigo-500 text-white font-bold rounded-lg shadow-md hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-300 transition duration-300"
+              className="w-full p-3 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 transition duration-300"
             >
               Login
-            </button>
+            </motion.button>
           </form>
-          <p className="text-gray-700 mt-4 text-center">
+
+          {/* Register & Forgot Password */}
+          <p className="text-gray-500 mt-4 text-center">
             Don't have an account?{" "}
-            <a href="/register" className="text-indigo-500 font-medium hover:underline">
-              Register
+            <a href="/register" className="text-blue-400 font-medium hover:underline">
+              Sign Up
             </a>
           </p>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

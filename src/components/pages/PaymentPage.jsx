@@ -4,6 +4,7 @@ import ApiService from "../../service/ApiService";
 import { useCart } from "../context/CartContext";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
+import { Box, Typography, Button, Paper, CircularProgress, Alert } from "@mui/material";
 
 // Load your Stripe publishable key
 const stripePromise = loadStripe("pk_test_51QH4Q1HpZQPWXTXAXpo9UcLoTgK7CgQX7Z4XiCNmMEPUYpLAKiNsFjQdIIfDQFFhP2KFDpAkw1h28OnOKvsMcfsi00nKtw7M0j");
@@ -18,7 +19,7 @@ const PaymentPage = () => {
     const [loading, setLoading] = useState(false);
 
     // Retrieve totalPrice from location state
-    const totalPrice = location.state?.totalPrice || 0;
+    const totalPrice = Number(location.state?.totalPrice) || 0;
 
     const handlePayment = async (event) => {
         event.preventDefault();
@@ -30,7 +31,7 @@ const PaymentPage = () => {
 
         try {
             const paymentMethod = await stripe.createPaymentMethod({
-                type: 'card',
+                type: "card",
                 card: cardElement,
             });
 
@@ -41,9 +42,9 @@ const PaymentPage = () => {
             }
 
             // Prepare order items for the API
-            const orderItems = cart.map(item => ({
+            const orderItems = cart.map((item) => ({
                 productId: item.id,
-                quantity: item.quantity
+                quantity: item.quantity,
             }));
 
             const orderRequest = {
@@ -62,7 +63,6 @@ const PaymentPage = () => {
                 setErrorMessage(response.message || "Payment failed");
                 setLoading(false);
             }
-
         } catch (error) {
             setErrorMessage("An error occurred while processing the payment.");
             setLoading(false);
@@ -70,25 +70,44 @@ const PaymentPage = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-            <div className="bg-white shadow-lg rounded-lg p-8 max-w-md w-full">
-                <h1 className="text-2xl font-bold text-center text-gray-800">Payment</h1>
-                <h2 className="mt-2 text-xl text-center text-gray-600">Total: ${totalPrice.toFixed(2)}</h2>
-                {errorMessage && <p className="mt-4 text-red-500 text-center">{errorMessage}</p>}
-                <form onSubmit={handlePayment} className="mt-6">
-                    <div className="mb-4">
-                        <CardElement className="border border-gray-300 p-2 rounded-md" />
-                    </div>
-                    <button 
-                        type="submit" 
-                        disabled={loading || !stripe} 
-                        className={`w-full py-2 rounded-lg text-white font-semibold transition duration-200 ${loading ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'}`}
+        <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            minHeight="100vh"
+            bgcolor="#f5f5f5"
+            p={2}
+        >
+            <Paper elevation={4} sx={{ p: 4, maxWidth: 400, width: "100%", textAlign: "center" }}>
+                <Typography variant="h5" fontWeight="bold">
+                    Payment
+                </Typography>
+                
+
+                {errorMessage && (
+                    <Alert severity="error" sx={{ mt: 2 }}>
+                        {errorMessage}
+                    </Alert>
+                )}
+
+                <form onSubmit={handlePayment} style={{ marginTop: 20 }}>
+                    <Box border="1px solid #ccc" borderRadius="5px" p={2} mb={3}>
+                        <CardElement />
+                    </Box>
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        disabled={loading || !stripe}
+                        sx={{ py: 1.5 }}
                     >
-                        {loading ? "Processing..." : "Pay Now"}
-                    </button>
+                        {loading ? <CircularProgress size={24} /> : "Pay Now"}
+                    </Button>
                 </form>
-            </div>
-        </div>
+            </Paper>
+        </Box>
     );
 };
 

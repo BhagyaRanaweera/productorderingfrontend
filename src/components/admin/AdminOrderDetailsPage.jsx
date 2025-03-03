@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import ApiService from "../../service/ApiService";
+import { Button, CircularProgress, TextField, Snackbar, Alert, Typography, Box } from "@mui/material";
 
 const OrderStatus = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED", "RETURNED"];
 
@@ -9,17 +10,22 @@ const AdminOrderDetailsPage = () => {
     const [orderItems, setOrderItems] = useState([]);
     const [message, setMessage] = useState('');
     const [selectedStatus, setSelectedStatus] = useState({});
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         fetchOrderDetails(itemId);
     }, [itemId]);
 
     const fetchOrderDetails = async (itemId) => {
+        setLoading(true);
         try {
             const response = await ApiService.getOrderItemById(itemId);
             setOrderItems(response.orderItemList);
         } catch (error) {
             console.log(error.message || error);
+            setMessage('Error fetching order details');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -28,9 +34,6 @@ const AdminOrderDetailsPage = () => {
     };
 
     const handleSubmitStatusChange = async (orderItemId) => {
-        console.log("Order Item ID:", orderItemId);
-        console.log("Selected Status:", selectedStatus[orderItemId]);
-    
         try {
             await ApiService.updateOrderitemStatus(orderItemId, selectedStatus[orderItemId]);
             setMessage('Order item status was successfully updated');
@@ -41,67 +44,115 @@ const AdminOrderDetailsPage = () => {
             setMessage(error.response?.data?.message || error.message || 'Unable to update order item status');
         }
     };
-    
+
+    const handleCloseSnackbar = () => {
+        setMessage('');
+    };
 
     return (
-        <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
-            {message && <div className="text-green-500 mb-4">{message}</div>}
-            <h2 className="text-2xl font-bold mb-4">Order Details</h2>
-            {orderItems.length ? (
+        <div className="max-w-5xl mx-auto p-6 bg-white rounded-lg shadow-lg mt-10">
+            {/* Snackbar for Error and Success */}
+            {message && (
+                <Snackbar open={true} autoHideDuration={3000} onClose={handleCloseSnackbar}>
+                    <Alert onClose={handleCloseSnackbar} severity={message.includes('Error') ? "error" : "success"} sx={{ width: "100%" }}>
+                        {message}
+                    </Alert>
+                </Snackbar>
+            )}
+
+            <Typography variant="h4" component="h2" gutterBottom>
+                Order Details
+            </Typography>
+
+            {/* Loading Spinner */}
+            {loading ? (
+                <div className="flex justify-center">
+                    <CircularProgress />
+                </div>
+            ) : orderItems.length ? (
                 orderItems.map((orderItem) => (
-                    <div key={orderItem.id} className="border-b pb-4 mb-4">
-                        <div className="mb-4">
-                            <h3 className="text-lg font-semibold">Order Information</h3>
-                            <p><strong>Order Item ID:</strong> {orderItem.id}</p>
-                            <p><strong>Quantity:</strong> {orderItem.quantity}</p>
-                            <p><strong>Total Price:</strong> ${orderItem.price.toFixed(2)}</p>
-                            <p><strong>Order Status:</strong> {orderItem.status}</p>
-                            <p><strong>Date Ordered:</strong> {new Date(orderItem.createdAt).toLocaleDateString()}</p>
-                        </div>
-                        <div className="mb-4">
-                            <h3 className="text-lg font-semibold">User  Information</h3>
-                            <p><strong>Name:</strong> {orderItem.user.name}</p>
-                            <p><strong>Email:</strong> {orderItem.user.email}</p>
-                            <p><strong>Phone:</strong> {orderItem.user.phoneNumber}</p>
-                            <p><strong>Role:</strong> {orderItem.user.role}</p>
-                        </div>
-                        <div className="mb-4">
-                            <h3 className="text-lg font-semibold">Delivery Address</h3>
-                            <p><strong>Country:</strong> {orderItem.user.address?.country}</p>
-                            <p><strong>State:</strong> {orderItem.user.address?.state}</p>
-                            <p><strong>City:</strong> {orderItem.user.address?.city}</p>
-                            <p><strong>Street:</strong> {orderItem.user.address?.street}</p>
-                            <p><strong>Zip Code:</strong> {orderItem.user.address?.zipcode}</p>
-                        </div>
-                        <div className="mb-4">
-                            <h3 className="text-lg font-semibold">Product Information</h3>
-                            <img src={orderItem.product.imageUrl} alt={orderItem.product.name} className="w-32 h-32 object-cover rounded-md mb-2" />
-                            <p><strong>Name:</strong> {orderItem.product.name}</p>
-                            <p><strong>Description:</strong> {orderItem.product.description}</p>
-                            <p><strong>Price:</strong> ${orderItem.product.price.toFixed(2)}</p>
-                        </div>
-                        <div className="mb-4">
-                            <h4 className="text-lg font-semibold">Change Status</h4>
-                            <select
-                                className="border rounded-md p-2 mr-2"
-                                value={selectedStatus[orderItem.id] || orderItem.status}
-                                onChange={(e) => handleStatusChange(orderItem.id, e.target.value)}
-                            >
-                                {OrderStatus.map(status => (
-                                    <option key={status} value={status}>{status}</option>
-                                ))}
-                            </select>
-                            <button 
-                                className="bg-blue-500 text-white font-semibold py-1 px-3 rounded-md hover:bg-blue-600 transition duration-200" 
-                                onClick={() => handleSubmitStatusChange(orderItem.id)}
-                            >
-                                Update Status
-                            </button>
-                        </div>
-                    </div>
+                    <Box key={orderItem.id} sx={{ mb: 6, borderBottom: '1px solid #e0e0e0', pb: 4 }}>
+                        {/* Order Information */}
+                        <Box sx={{ mb: 4 }}>
+                            <Typography variant="h6" component="h3" gutterBottom>
+                                Order Information
+                            </Typography>
+                            <Typography><strong>Order Item ID:</strong> {orderItem.id}</Typography>
+                            <Typography><strong>Quantity:</strong> {orderItem.quantity}</Typography>
+                            <Typography><strong>Total Price:</strong> ${orderItem.price.toFixed(2)}</Typography>
+                            <Typography><strong>Order Status:</strong> {orderItem.status}</Typography>
+                            <Typography><strong>Date Ordered:</strong> {new Date(orderItem.createdAt).toLocaleDateString()}</Typography>
+                        </Box>
+
+                        {/* User Information */}
+                        <Box sx={{ mb: 4 }}>
+                            <Typography variant="h6" component="h3" gutterBottom>
+                                User Information
+                            </Typography>
+                            <Typography><strong>Name:</strong> {orderItem.user.name}</Typography>
+                            <Typography><strong>Email:</strong> {orderItem.user.email}</Typography>
+                            <Typography><strong>Phone:</strong> {orderItem.user.phoneNumber}</Typography>
+                            <Typography><strong>Role:</strong> {orderItem.user.role}</Typography>
+                        </Box>
+
+                        {/* Delivery Address */}
+                        <Box sx={{ mb: 4 }}>
+                            <Typography variant="h6" component="h3" gutterBottom>
+                                Delivery Address
+                            </Typography>
+                            <Typography><strong>Country:</strong> {orderItem.user.address?.country}</Typography>
+                            <Typography><strong>State:</strong> {orderItem.user.address?.state}</Typography>
+                            <Typography><strong>City:</strong> {orderItem.user.address?.city}</Typography>
+                            <Typography><strong>Street:</strong> {orderItem.user.address?.street}</Typography>
+                            <Typography><strong>Zip Code:</strong> {orderItem.user.address?.zipcode}</Typography>
+                        </Box>
+
+                        {/* Product Information */}
+                        <Box sx={{ mb: 4 }}>
+                            <Typography variant="h6" component="h3" gutterBottom>
+                                Product Information
+                            </Typography>
+                            <img src={orderItem.product.imageUrl} alt={orderItem.product.name} style={{ width: 200, height: 200, objectFit: 'cover', borderRadius: 8, marginBottom: 16 }} />
+                            <Typography><strong>Name:</strong> {orderItem.product.name}</Typography>
+                            <Typography><strong>Description:</strong> {orderItem.product.description}</Typography>
+                            <Typography><strong>Price:</strong> ${orderItem.product.price.toFixed(2)}</Typography>
+                        </Box>
+
+                        {/* Status Change */}
+                        <Box sx={{ mb: 4 }}>
+                            <Typography variant="h6" component="h4" gutterBottom>
+                                Change Status
+                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                <TextField
+                                    select
+                                    label="Order Status"
+                                    value={selectedStatus[orderItem.id] || orderItem.status}
+                                    onChange={(e) => handleStatusChange(orderItem.id, e.target.value)}
+                                    fullWidth
+                                    SelectProps={{
+                                        native: true,
+                                    }}
+                                >
+                                    {OrderStatus.map((status) => (
+                                        <option key={status} value={status}>
+                                            {status}
+                                        </option>
+                                    ))}
+                                </TextField>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => handleSubmitStatusChange(orderItem.id)}
+                                >
+                                    Update Status
+                                </Button>
+                            </Box>
+                        </Box>
+                    </Box>
                 ))
             ) : (
-                <p className="text-gray-500">Loading order details ....</p>
+                <Typography color="textSecondary">No order details available.</Typography>
             )}
         </div>
     );
