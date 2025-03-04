@@ -53,24 +53,20 @@ export default class ApiService {
         return response.data;
     }
 
-    static async getAllProducts(sortBy = "name", sortOrder = "asc") {
-        const response = await axios.get(`${this.BASE_URL}/product/get-all`, {
-            params: { sortBy, sortOrder }
-        });
+    static async getAllProducts() {
+        const response = await axios.get(`${this.BASE_URL}/product/get-all`)
         return response.data;
     }
 
-    static async searchProducts(searchValue, sortBy = "name", sortOrder = "asc") {
+    static async searchProducts(searchValue) {
         const response = await axios.get(`${this.BASE_URL}/product/search`, {
-            params: { searchValue, sortBy, sortOrder }
+            params: { searchValue }
         });
         return response.data;
     }
 
-    static async getProductsByCategory(categoryId, sortBy = "name", sortOrder = "asc") {
-        const response = await axios.get(`${this.BASE_URL}/product/get-by-category-id/${categoryId}`, {
-            params: { sortBy, sortOrder }
-        });
+    static async getProductsByCategory(categoryId) {
+        const response = await axios.get(`${this.BASE_URL}/product/get-by-category-id/${categoryId}`)
         return response.data;
     }
 
@@ -94,10 +90,8 @@ export default class ApiService {
         return response.data;
     }
 
-    static async getAllCategory(sortBy = "name", sortOrder = "asc") {
-        const response = await axios.get(`${this.BASE_URL}/category/get-all`, {
-            params: { sortBy, sortOrder }
-        });
+    static async getAllCategory() {
+        const response = await axios.get(`${this.BASE_URL}/category/get-all`)
         return response.data;
     }
 
@@ -106,6 +100,7 @@ export default class ApiService {
         return response.data;
     }
 
+  
     static async updateCategory(categoryId, body) {
         const response = await axios.put(`${this.BASE_URL}/category/update/${categoryId}`, body, {
             headers: this.getHeader()
@@ -121,7 +116,7 @@ export default class ApiService {
             return response.data;
         } catch (error) {
             console.error("Error deleting category:", error.response ? error.response.data : error.message);
-            throw error;
+            throw error; // Rethrow the error for handling in the component
         }
     }
 
@@ -133,27 +128,26 @@ export default class ApiService {
         return response.data;
     }
 
-    static async getAllOrders(sortBy = "date", sortOrder = "desc") {
+    static async getAllOrders() {
         const response = await axios.get(`${this.BASE_URL}/order/filter`, {
-            headers: this.getHeader(),
-            params: { sortBy, sortOrder }
-        });
+            headers: this.getHeader()
+        })
         return response.data;
     }
 
     static async getOrderItemById(itemId) {
         const response = await axios.get(`${this.BASE_URL}/order/filter`, {
             headers: this.getHeader(),
-            params: { itemId }
-        });
+            params: {itemId}
+        })
         return response.data;
     }
 
-    static async getAllOrderItemsByStatus(status, sortBy = "date", sortOrder = "desc") {
+    static async getAllOrderItemsByStatus(status) {
         const response = await axios.get(`${this.BASE_URL}/order/filter`, {
             headers: this.getHeader(),
-            params: { status, sortBy, sortOrder }
-        });
+            params: {status}
+        })
         return response.data;
     }
 
@@ -163,13 +157,13 @@ export default class ApiService {
                 `${this.BASE_URL}/order/update-item-status/${orderItemId}`,
                 {},
                 {
-                    headers: this.getHeader(),
-                    params: { status }
+                    headers: this.getHeader(),  // Include any necessary headers
+                    params: { status }          // Send the status as a query parameter
                 }
             );
             return response.data;
         } catch (error) {
-            throw error;
+            throw error;  // Pass the error to the calling function
         }
     }
 
