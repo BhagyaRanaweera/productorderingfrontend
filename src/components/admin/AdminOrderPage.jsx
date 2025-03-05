@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../common/Pagination";
 import ApiService from "../../service/ApiService";
+import { Button, Select, MenuItem, FormControl, InputLabel, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Snackbar, Alert, Box } from "@mui/material";
 
 const OrderStatus = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED", "RETURNED"];
 
 const AdminOrdersPage = () => {
+
     const [orders, setOrders] = useState([]);
     const [filteredOrders, setFilteredOrders] = useState([]);
     const [statusFilter, setStatusFilter] = useState('');
@@ -24,12 +26,13 @@ const AdminOrdersPage = () => {
     const fetchOrders = async () => {
         try {
             let response;
-            if (searchStatus) {
+            if(searchStatus){
                 response = await ApiService.getAllOrderItemsByStatus(searchStatus);
             } else {
                 response = await ApiService.getAllOrders();
             }
             const orderList = response.orderItemList || [];
+
             setTotalPages(Math.ceil(orderList.length / itemsPerPage));
             setOrders(orderList);
             setFilteredOrders(orderList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
@@ -66,77 +69,87 @@ const AdminOrdersPage = () => {
     };
 
     return (
-        <div className="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
-            <h2 className="text-2xl font-bold mb-4">Orders</h2>
-            {error && <p className="text-red-500 mb-4">{error}</p>}
+        <Box className="admin-orders-page" p={3}>
+            <Typography variant="h4" gutterBottom>Orders</Typography>
 
-            <div className="flex justify-between mb-4">
-                <div className="flex items-center">
-                    <label className="mr-2">Filter By Status:</label>
-                    <select
-                        value={statusFilter}
-                        onChange={handleFilterChange}
-                        className="border rounded-md p-2"
-                    >
-                        <option value="">All</option>
-                        {OrderStatus.map(status => (
-                            <option key={status} value={status}>{status}</option>
-                        ))}
-                    </select>
-                </div>
-                <div className="flex items-center">
-                    <label className="mr-2">Search By Status:</label>
-                    <select
-                        value={searchStatus}
-                        onChange={handleSearchStatusChange}
-                        className="border rounded-md p-2"
-                    >
-                        <option value="">All</option>
-                        {OrderStatus.map(status => (
-                            <option key={status} value={status}>{status}</option>
-                        ))}
-                    </select>
-                </div>
-            </div>
+            {error && (
+                <Snackbar open={Boolean(error)} autoHideDuration={3000} onClose={() => setError('')}>
+                    <Alert severity="error" sx={{ width: '100%' }}>
+                        {error}
+                    </Alert>
+                </Snackbar>
+            )}
 
-            <table className="min-w-full bg-white border border-gray-300">
-                <thead>
-                    <tr className="border-b">
-                        <th className="py-2 px-4 text-left">Order ID</th>
-                        <th className="py-2 px-4 text-left">Customer</th>
-                        <th className="py-2 px-4 text-left">Status</th>
-                        <th className="py-2 px-4 text-left">Price</th>
-                        <th className="py-2 px-4 text-left">Date Ordered</th>
-                        <th className="py-2 px-4 text-left">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {filteredOrders.map(order => (
-                        <tr key={order.id} className="hover:bg-gray-100">
-                            <td className="py-2 px-4">{order.id}</td>
-                            <td className="py-2 px-4">{order.user.name}</td>
-                            <td className="py-2 px-4">{order.status}</td>
-                            <td className="py-2 px-4">${order.price.toFixed(2)}</td>
-                            <td className="py-2 px-4">{new Date(order.createdAt).toLocaleDateString()}</td>
-                            <td className="py-2 px-4">
-                                <button
-                                    onClick={() => handleOrderDetails(order.id)}
-                                    className="bg-blue-500 text-white font-semibold py-1 px-3 rounded-md hover:bg-blue-600 transition duration-200"
-                                >
-                                    Details
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <Box display="flex" justifyContent="space-between" mb={2}>
+                <Box width="45%">
+                    <Typography variant="subtitle1">Filter By Status</Typography>
+                    <FormControl fullWidth>
+                        <InputLabel>Order Status</InputLabel>
+                        <Select value={statusFilter} onChange={handleFilterChange} label="Order Status">
+                            <MenuItem value="">
+                                <em>All</em>
+                            </MenuItem>
+                            {OrderStatus.map(status => (
+                                <MenuItem key={status} value={status}>{status}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </Box>
+
+                <Box width="45%">
+                    <Typography variant="subtitle1">Search By Status</Typography>
+                    <FormControl fullWidth>
+                        <InputLabel>Order Status</InputLabel>
+                        <Select value={searchStatus} onChange={handleSearchStatusChange} label="Order Status">
+                            <MenuItem value="">
+                                <em>All</em>
+                            </MenuItem>
+                            {OrderStatus.map(status => (
+                                <MenuItem key={status} value={status}>{status}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </Box>
+            </Box>
+
+            <TableContainer>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell><strong>Order ID</strong></TableCell>
+                            <TableCell><strong>Customer</strong></TableCell>
+                            <TableCell><strong>Status</strong></TableCell>
+                            <TableCell><strong>Price</strong></TableCell>
+                            <TableCell><strong>Date Ordered</strong></TableCell>
+                            <TableCell><strong>Actions</strong></TableCell>
+                        </TableRow>
+                    </TableHead>
+
+                    <TableBody>
+                        {filteredOrders.map(order => (
+                            <TableRow key={order.id}>
+                                <TableCell>{order.id}</TableCell>
+                                <TableCell>{order.user.name}</TableCell>
+                                <TableCell>{order.status}</TableCell>
+                                <TableCell>${order.price.toFixed(2)}</TableCell>
+                                <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
+                                <TableCell>
+                                    <Button variant="contained" color="primary" onClick={() => handleOrderDetails(order.id)}>
+                                        Details
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
 
             <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={(page) => setCurrentPage(page)}
             />
-        </div>
+        </Box>
     );
 };
 

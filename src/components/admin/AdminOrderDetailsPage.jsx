@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import ApiService from "../../service/ApiService";
-import { Button, CircularProgress, TextField, Snackbar, Alert, Typography, Box } from "@mui/material";
+import { Button, CircularProgress, Snackbar, Alert, Typography, Box, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 
 const OrderStatus = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED", "RETURNED"];
 
@@ -10,22 +10,21 @@ const AdminOrderDetailsPage = () => {
     const [orderItems, setOrderItems] = useState([]);
     const [message, setMessage] = useState('');
     const [selectedStatus, setSelectedStatus] = useState({});
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true); // Added loading state
 
     useEffect(() => {
         fetchOrderDetails(itemId);
     }, [itemId]);
 
     const fetchOrderDetails = async (itemId) => {
-        setLoading(true);
         try {
             const response = await ApiService.getOrderItemById(itemId);
             setOrderItems(response.orderItemList);
         } catch (error) {
-            console.log(error.message || error);
-            setMessage('Error fetching order details');
+            setMessage('Failed to fetch order details');
+            console.error(error.message || error);
         } finally {
-            setLoading(false);
+            setLoading(false); // Stop loading when data is fetched or error occurs
         }
     };
 
@@ -37,112 +36,85 @@ const AdminOrderDetailsPage = () => {
         try {
             await ApiService.updateOrderitemStatus(orderItemId, selectedStatus[orderItemId]);
             setMessage('Order item status was successfully updated');
-            setTimeout(() => {
-                setMessage('');
-            }, 3000);
+            setTimeout(() => setMessage(''), 3000);
         } catch (error) {
             setMessage(error.response?.data?.message || error.message || 'Unable to update order item status');
         }
     };
 
-    const handleCloseSnackbar = () => {
-        setMessage('');
-    };
-
     return (
-        <div className="max-w-5xl mx-auto p-6 bg-white rounded-lg shadow-lg mt-10">
-            {/* Snackbar for Error and Success */}
+        <div className="order-details-page">
             {message && (
-                <Snackbar open={true} autoHideDuration={3000} onClose={handleCloseSnackbar}>
-                    <Alert onClose={handleCloseSnackbar} severity={message.includes('Error') ? "error" : "success"} sx={{ width: "100%" }}>
+                <Snackbar open={Boolean(message)} autoHideDuration={3000} onClose={() => setMessage('')}>
+                    <Alert severity="success" sx={{ width: '100%' }}>
                         {message}
                     </Alert>
                 </Snackbar>
             )}
-
-            <Typography variant="h4" component="h2" gutterBottom>
-                Order Details
-            </Typography>
-
-            {/* Loading Spinner */}
+            <Typography variant="h4" gutterBottom>Order Details</Typography>
             {loading ? (
-                <div className="flex justify-center">
-                    <CircularProgress />
-                </div>
+                <CircularProgress /> // Show loading indicator while fetching data
             ) : orderItems.length ? (
                 orderItems.map((orderItem) => (
-                    <Box key={orderItem.id} sx={{ mb: 6, borderBottom: '1px solid #e0e0e0', pb: 4 }}>
-                        {/* Order Information */}
-                        <Box sx={{ mb: 4 }}>
-                            <Typography variant="h6" component="h3" gutterBottom>
-                                Order Information
-                            </Typography>
+                    <Box key={orderItem.id} className="order-item-details" mb={3} p={2} sx={{ border: '1px solid #ddd', borderRadius: '8px' }}>
+                        <Box mb={2}>
+                            <Typography variant="h6">Order Information</Typography>
                             <Typography><strong>Order Item ID:</strong> {orderItem.id}</Typography>
                             <Typography><strong>Quantity:</strong> {orderItem.quantity}</Typography>
-                            <Typography><strong>Total Price:</strong> ${orderItem.price.toFixed(2)}</Typography>
+                            <Typography><strong>Total Price:</strong> {orderItem.price}</Typography>
                             <Typography><strong>Order Status:</strong> {orderItem.status}</Typography>
                             <Typography><strong>Date Ordered:</strong> {new Date(orderItem.createdAt).toLocaleDateString()}</Typography>
                         </Box>
 
-                        {/* User Information */}
-                        <Box sx={{ mb: 4 }}>
-                            <Typography variant="h6" component="h3" gutterBottom>
-                                User Information
-                            </Typography>
-                            <Typography><strong>Name:</strong> {orderItem.user.name}</Typography>
-                            <Typography><strong>Email:</strong> {orderItem.user.email}</Typography>
-                            <Typography><strong>Phone:</strong> {orderItem.user.phoneNumber}</Typography>
-                            <Typography><strong>Role:</strong> {orderItem.user.role}</Typography>
+                        <Box mb={2}>
+                            <Typography variant="h6">User Information</Typography>
+                            <Typography><strong>Name:</strong> {orderItem.user?.name || 'N/A'}</Typography>
+                            <Typography><strong>Email:</strong> {orderItem.user?.email || 'N/A'}</Typography>
+                            <Typography><strong>Phone:</strong> {orderItem.user?.phoneNumber || 'N/A'}</Typography>
+                            <Typography><strong>Role:</strong> {orderItem.user?.role || 'N/A'}</Typography>
                         </Box>
 
-                        {/* Delivery Address */}
-                        <Box sx={{ mb: 4 }}>
-                            <Typography variant="h6" component="h3" gutterBottom>
-                                Delivery Address
-                            </Typography>
-                            <Typography><strong>Country:</strong> {orderItem.user.address?.country}</Typography>
-                            <Typography><strong>State:</strong> {orderItem.user.address?.state}</Typography>
-                            <Typography><strong>City:</strong> {orderItem.user.address?.city}</Typography>
-                            <Typography><strong>Street:</strong> {orderItem.user.address?.street}</Typography>
-                            <Typography><strong>Zip Code:</strong> {orderItem.user.address?.zipcode}</Typography>
+                        <Box mb={2}>
+                            <Typography variant="h6">Delivery Address</Typography>
+                            <Typography><strong>Country:</strong> {orderItem.user?.address?.country || 'N/A'}</Typography>
+                            <Typography><strong>State:</strong> {orderItem.user?.address?.state || 'N/A'}</Typography>
+                            <Typography><strong>City:</strong> {orderItem.user?.address?.city || 'N/A'}</Typography>
+                            <Typography><strong>Street:</strong> {orderItem.user?.address?.street || 'N/A'}</Typography>
+                            <Typography><strong>Zip Code:</strong> {orderItem.user?.address?.zipcode || 'N/A'}</Typography>
                         </Box>
 
-                        {/* Product Information */}
-                        <Box sx={{ mb: 4 }}>
-                            <Typography variant="h6" component="h3" gutterBottom>
-                                Product Information
-                            </Typography>
-                            <img src={orderItem.product.imageUrl} alt={orderItem.product.name} style={{ width: 200, height: 200, objectFit: 'cover', borderRadius: 8, marginBottom: 16 }} />
-                            <Typography><strong>Name:</strong> {orderItem.product.name}</Typography>
-                            <Typography><strong>Description:</strong> {orderItem.product.description}</Typography>
-                            <Typography><strong>Price:</strong> ${orderItem.product.price.toFixed(2)}</Typography>
+                        <Box mb={2}>
+                            <Typography variant="h6">Product Information</Typography>
+                            <img 
+                                src={orderItem.product?.imageUrl || 'default-image-url.jpg'} 
+                                alt={orderItem.product?.name || 'Product Name'} 
+                                style={{ width: '100px', height: 'auto' }} 
+                            />
+                            <Typography><strong>Name:</strong> {orderItem.product?.name || 'N/A'}</Typography>
+                            <Typography><strong>Description:</strong> {orderItem.product?.description || 'N/A'}</Typography>
+                            <Typography><strong>Price:</strong> {orderItem.product?.price || 'N/A'}</Typography>
                         </Box>
 
-                        {/* Status Change */}
-                        <Box sx={{ mb: 4 }}>
-                            <Typography variant="h6" component="h4" gutterBottom>
-                                Change Status
-                            </Typography>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <TextField
-                                    select
-                                    label="Order Status"
+                        <Box>
+                            <Typography variant="h6">Change Status</Typography>
+                            <FormControl fullWidth>
+                                <InputLabel>Order Status</InputLabel>
+                                <Select
                                     value={selectedStatus[orderItem.id] || orderItem.status}
                                     onChange={(e) => handleStatusChange(orderItem.id, e.target.value)}
-                                    fullWidth
-                                    SelectProps={{
-                                        native: true,
-                                    }}
+                                    label="Order Status"
                                 >
-                                    {OrderStatus.map((status) => (
-                                        <option key={status} value={status}>
+                                    {OrderStatus.map(status => (
+                                        <MenuItem key={status} value={status}>
                                             {status}
-                                        </option>
+                                        </MenuItem>
                                     ))}
-                                </TextField>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
+                                </Select>
+                            </FormControl>
+                            <Box mt={2}>
+                                <Button 
+                                    variant="contained" 
+                                    color="primary" 
                                     onClick={() => handleSubmitStatusChange(orderItem.id)}
                                 >
                                     Update Status
@@ -152,7 +124,7 @@ const AdminOrderDetailsPage = () => {
                     </Box>
                 ))
             ) : (
-                <Typography color="textSecondary">No order details available.</Typography>
+                <Typography>No order details available</Typography>
             )}
         </div>
     );

@@ -4,7 +4,7 @@ import { IoMdSearch } from "react-icons/io";
 import { FaCartShopping } from "react-icons/fa6";
 import DarkMode from "./DarkMode";
 import ApiService from "../../service/ApiService";
-import LanguageSelector from "../common/LanguageSelector";
+
 import { useCart } from "../context/CartContext"; // Import useCart context
 import Logo from "../../assets/logo.png";
 
@@ -91,8 +91,6 @@ const Navbar = ( ) => {
             {/* Dark Mode Switch */}
             <DarkMode />
 
-            {/* Language Selector */}
-            <LanguageSelector />
           </div>
         </div>
       </div>

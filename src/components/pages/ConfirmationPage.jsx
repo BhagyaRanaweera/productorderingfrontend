@@ -1,10 +1,50 @@
-import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import emailjs from "@emailjs/browser"; // Ensure correct import
 
 const ConfirmationPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { paymentInfo } = location.state || {}; // Retrieve payment info from the location state
+    const { paymentInfo, email } = location.state || {}; // Retrieve payment info and email
+
+    // Function to send confirmation email
+    const sendConfirmationEmail = async () => {
+        if (!email) {
+            console.error("Error: Email is missing");
+            return;
+        }
+
+        const templateParams = {
+            to_email: email, // Recipient's email
+            message: `Hello,
+
+Thank you for your order!
+
+Your payment was successful.
+
+We appreciate your business!
+
+Best regards,
+ModishMart Team`,
+        };
+
+        try {
+            const response = await emailjs.send(
+                "service_rc97k2v", // Your EmailJS service ID
+                "template_4qpyrqd", // Your EmailJS template ID
+                templateParams, // Template parameters
+                "G74nxxfEV6oL9xdmr" // Your EmailJS public key
+            );
+            console.log("Email sent successfully:", response);
+        } catch (error) {
+            console.error("Error sending email:", error);
+        }
+    };
+
+    // Send email when the page loads
+    useEffect(() => {
+        sendConfirmationEmail();
+    }, [email]);
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
