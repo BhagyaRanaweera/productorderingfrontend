@@ -5,7 +5,8 @@ import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
 import ApiService from "../../service/ApiService";
 import { TextField, Button, Container, Typography, Box, Alert } from "@mui/material";
-
+import emailjs from "emailjs-com"; // Import EmailJS SDK
+emailjs.init("nyCX8WqLZauvzgNH0");
 const schema = yup.object().shape({
   email: yup.string().email("Invalid email").required("Email is required"),
   name: yup.string().min(3, "Name must be at least 3 characters").required("Name is required"),
@@ -26,11 +27,41 @@ const RegisterPage = () => {
 
   const [message, setMessage] = React.useState(null);
 
+  // Function to send a confirmation email
+  const sendConfirmationEmail = (email, name) => {
+    const templateParams = {
+      to_email: email, // User's email
+      name: name,      // User's name
+      subject: "Registration Successful",
+      message: `Hello ${name},\n\nThank you for registering on our platform! We're excited to have you on board.\n\nBest regards,\nModishMart Team`,
+    };
+
+    emailjs
+      .send(
+        "service_19azhx8", // Replace with your EmailJS service ID
+        "template_wz0eomn", // Replace with your EmailJS template ID
+        templateParams,
+        
+      )
+      .then(
+        (response) => {
+          console.log("Email sent successfully:", response);
+        },
+        (error) => {
+          console.error("Failed to send email:", error);
+        }
+      );
+  };
+
   const onSubmit = async (data) => {
     try {
       const response = await ApiService.registerUser(data);
       if (response.status === 200) {
         setMessage({ type: "success", text: "User Successfully Registered" });
+
+        // Send the confirmation email after successful registration
+        sendConfirmationEmail(data.email, data.name);
+
         setTimeout(() => navigate("/login"), 3000);
       }
     } catch (error) {

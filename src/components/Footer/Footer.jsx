@@ -33,7 +33,7 @@ const FooterLinks = [
   },
   {
     title: "Blog",
-    link: "/#blog",
+    link: "https://www.siegemedia.com/strategy/business-blog-examples",
   },
 ];
 
@@ -53,6 +53,7 @@ const Footer = () => {
 
           {/* Footer Links */}
           <div className="grid grid-cols-2 sm:grid-cols-3 col-span-2 md:pl-10">
+            {/* Important Links */}
             <div>
               <div className="py-8 px-4">
                 <h1 className="sm:text-xl text-xl font-bold sm:text-left text-justify mb-3">
@@ -73,27 +74,48 @@ const Footer = () => {
               </div>
             </div>
 
-            {/* social links */}
+            {/* About Section */}
             <div>
-              <div className="flex items-center gap-3 mt-6">
-                <a href="https://www.instagram.com/yourprofile" target="_blank" rel="noopener noreferrer">
-                  <FaInstagram className="text-3xl" />
-                </a>
-                <a href="https://www.facebook.com/yourprofile" target="_blank" rel="noopener noreferrer">
-                  <FaFacebook className="text-3xl" />
-                </a>
-               
+              <div className="py-8 px-4">
+                <h1 className="sm:text-xl text-xl font-bold sm:text-left text-justify mb-3">
+                  About
+                </h1>
+                <p className="text-gray-200">
+                  We are ModishMart, providing high-quality products to meet your needs. Our goal is to offer a one-stop shopping experience for all your essentials.
+                </p>
               </div>
-              <div className="mt-6">
-                <div className="flex items-center gap-3">
-                  <FaLocationArrow />
-                  <p>No.30, Lotus Road, Colombo 4</p>
-                </div>
-                <div className="flex items-center gap-3 mt-3">
-                  <FaMobileAlt />
-                  <p>+94 123456789</p>
-                </div>
+            </div>
+
+            {/* Contact Section */}
+            <div>
+              <div className="py-8 px-4">
+                <h1 className="sm:text-xl text-xl font-bold sm:text-left text-justify mb-3">
+                  Contact Us
+                </h1>
+                <ul className="flex flex-col gap-3">
+                  <li className="text-gray-200">
+                    <FaLocationArrow className="inline-block" /> No.30, Lotus Road, Colombo 4
+                  </li>
+                  <li className="text-gray-200">
+                    <FaMobileAlt className="inline-block" /> +94 123456789
+                  </li>
+                  <li className="text-gray-200">
+                    <a href="mailto:info@modishmart.com">
+                      <FaLinkedin className="inline-block" /> info@modishmart.com
+                    </a>
+                  </li>
+                </ul>
               </div>
+            </div>
+
+            {/* Social Links */}
+            <div className="flex items-center gap-3 mt-6">
+              <a href="https://www.instagram.com/yourprofile" target="_blank" rel="noopener noreferrer">
+                <FaInstagram className="text-3xl" />
+              </a>
+              <a href="https://www.facebook.com/yourprofile" target="_blank" rel="noopener noreferrer">
+                <FaFacebook className="text-3xl" />
+              </a>
             </div>
           </div>
         </div>

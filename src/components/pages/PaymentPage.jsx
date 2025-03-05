@@ -3,10 +3,11 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ApiService from "../../service/ApiService";
 import { useCart } from "../context/CartContext";
 import { loadStripe } from "@stripe/stripe-js";
-import { Elements, CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import { Box, Typography, Button, Paper, CircularProgress, Alert } from "@mui/material";
+import { Elements, CardNumberElement, CardExpiryElement, CardCvcElement, useElements, useStripe } from "@stripe/react-stripe-js";
+import { Box, Typography, Button, Paper, CircularProgress, Alert, TextField } from "@mui/material";
+import emailjs from "emailjs-com";
+emailjs.init("G74nxxfEV6oL9xdmr");
 
-// Load your Stripe publishable key
 const stripePromise = loadStripe("pk_test_51QH4Q1HpZQPWXTXAXpo9UcLoTgK7CgQX7Z4XiCNmMEPUYpLAKiNsFjQdIIfDQFFhP2KFDpAkw1h28OnOKvsMcfsi00nKtw7M0j");
 
 const PaymentPage = () => {
@@ -18,8 +19,20 @@ const PaymentPage = () => {
     const [errorMessage, setErrorMessage] = useState("");
     const [loading, setLoading] = useState(false);
 
-    // Retrieve totalPrice from location state
     const totalPrice = Number(location.state?.totalPrice) || 0;
+
+    const sendEmailConfirmation = async () => {
+        const templateParams = {
+            message: `Hello,\n\nThank you for your order!\n\nYour payment was successful.\n\nWe appreciate your business!\n\nBest regards,\nModishMart Team`,
+        };
+
+        try {
+            await emailjs.send("service_rc97k2v", "template_4qpyrqd", templateParams);
+            console.log("Email sent successfully!");
+        } catch (error) {
+            console.error("Error sending email:", error);
+        }
+    };
 
     const handlePayment = async (event) => {
         event.preventDefault();
@@ -27,12 +40,14 @@ const PaymentPage = () => {
 
         setLoading(true);
 
-        const cardElement = elements.getElement(CardElement);
+        const cardNumberElement = elements.getElement(CardNumberElement);
+        const cardExpiryElement = elements.getElement(CardExpiryElement);
+        const cardCvcElement = elements.getElement(CardCvcElement);
 
         try {
             const paymentMethod = await stripe.createPaymentMethod({
                 type: "card",
-                card: cardElement,
+                card: cardNumberElement,
             });
 
             if (paymentMethod.error) {
@@ -41,7 +56,6 @@ const PaymentPage = () => {
                 return;
             }
 
-            // Prepare order items for the API
             const orderItems = cart.map((item) => ({
                 productId: item.id,
                 quantity: item.quantity,
@@ -56,7 +70,7 @@ const PaymentPage = () => {
             const response = await ApiService.createOrder(orderRequest);
 
             if (response.status === 200) {
-                // Payment successful, clear the cart and navigate to confirmation page
+                await sendEmailConfirmation();
                 setLoading(false);
                 navigate("/confirmation");
             } else {
@@ -70,38 +84,41 @@ const PaymentPage = () => {
     };
 
     return (
-        <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            justifyContent="center"
-            minHeight="100vh"
-            bgcolor="#f5f5f5"
-            p={2}
-        >
-            <Paper elevation={4} sx={{ p: 4, maxWidth: 400, width: "100%", textAlign: "center" }}>
-                <Typography variant="h5" fontWeight="bold">
+        <Box className="flex flex-col items-center justify-center min-h-screen bg-gray-100 py-6">
+            <Paper elevation={4} className="p-8 max-w-md w-full shadow-lg rounded-lg bg-white bg-opacity-50 backdrop-blur-md">
+                <Typography variant="h5" className="font-bold text-center text-xl mb-6">
                     Payment
                 </Typography>
-                
 
                 {errorMessage && (
-                    <Alert severity="error" sx={{ mt: 2 }}>
+                    <Alert severity="error" className="mb-4">
                         {errorMessage}
                     </Alert>
                 )}
 
-                <form onSubmit={handlePayment} style={{ marginTop: 20 }}>
-                    <Box border="1px solid #ccc" borderRadius="5px" p={2} mb={3}>
-                        <CardElement />
+                <form onSubmit={handlePayment} className="w-full">
+                    <Box className="mb-4">
+                        <Typography className="mb-2">Card Number</Typography>
+                        <CardNumberElement className="border p-4 rounded w-full bg-white bg-opacity-50 backdrop-blur-md" />
                     </Box>
+
+                    <Box className="mb-4">
+                        <Typography className="mb-2">Expiry Date</Typography>
+                        <CardExpiryElement className="border p-4 rounded w-full bg-white bg-opacity-50 backdrop-blur-md" />
+                    </Box>
+
+                    <Box className="mb-4">
+                        <Typography className="mb-2">CVC</Typography>
+                        <CardCvcElement className="border p-4 rounded w-full bg-white bg-opacity-50 backdrop-blur-md" />
+                    </Box>
+
                     <Button
                         type="submit"
                         variant="contained"
                         color="primary"
                         fullWidth
                         disabled={loading || !stripe}
-                        sx={{ py: 1.5 }}
+                        className="py-3 mt-4"
                     >
                         {loading ? <CircularProgress size={24} /> : "Pay Now"}
                     </Button>
@@ -111,7 +128,6 @@ const PaymentPage = () => {
     );
 };
 
-// Wrap the PaymentPage component with Elements provider for Stripe
 const StripePaymentPage = () => {
     return (
         <Elements stripe={stripePromise}>

@@ -6,21 +6,20 @@ export default class ApiService {
 
     static getHeader() {
         const token = localStorage.getItem("token");
-        console.log("Token retrieved:", token); // Debugging line
         return {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json"
         };
     }
 
-    /**AUTh && USERS API */
+    /** AUTH & USERS API */
     static async registerUser(registration) {
-        const response = await axios.post(`${this.BASE_URL}/auth/register`, registration)
+        const response = await axios.post(`${this.BASE_URL}/auth/register`, registration);
         return response.data;
     }
 
     static async loginUser(loginDetails) {
-        const response = await axios.post(`${this.BASE_URL}/auth/login`, loginDetails)
+        const response = await axios.post(`${this.BASE_URL}/auth/login`, loginDetails);
         return response.data;
     }
 
@@ -31,8 +30,21 @@ export default class ApiService {
         return response.data;
     }
 
-    /**PRODUCT ENDPOINT */
+    /** ORDER HISTORY API for Logged-in User */
+    static async getUserOrderHistory(page = 0, size = 5) {
+        try {
+            const response = await axios.get(`${this.BASE_URL}/order/my-orders`, {
+                params: { page, size },
+                headers: this.getHeader()
+            });
+            return response.data.orderItemList;
+        } catch (error) {
+            console.error("Error fetching order history:", error);
+            return [];
+        }
+    }
 
+    /** PRODUCT ENDPOINTS */
     static async addProduct(formData) {
         const response = await axios.post(`${this.BASE_URL}/product/create`, formData, {
             headers: {
@@ -54,7 +66,7 @@ export default class ApiService {
     }
 
     static async getAllProducts() {
-        const response = await axios.get(`${this.BASE_URL}/product/get-all`)
+        const response = await axios.get(`${this.BASE_URL}/product/get-all`);
         return response.data;
     }
 
@@ -66,12 +78,12 @@ export default class ApiService {
     }
 
     static async getProductsByCategory(categoryId) {
-        const response = await axios.get(`${this.BASE_URL}/product/get-by-category-id/${categoryId}`)
+        const response = await axios.get(`${this.BASE_URL}/product/get-by-category-id/${categoryId}`);
         return response.data;
     }
 
     static async getProductById(productId) {
-        const response = await axios.get(`${this.BASE_URL}/product/get-by-product-id/${productId}`)
+        const response = await axios.get(`${this.BASE_URL}/product/get-by-product-id/${productId}`);
         return response.data;
     }
 
@@ -82,25 +94,24 @@ export default class ApiService {
         return response.data;
     }
 
-    /**CATEGORY */
+    /** CATEGORY ENDPOINTS */
     static async createCategory(body) {
         const response = await axios.post(`${this.BASE_URL}/category/create`, body, {
             headers: this.getHeader()
-        })
+        });
         return response.data;
     }
 
     static async getAllCategory() {
-        const response = await axios.get(`${this.BASE_URL}/category/get-all`)
+        const response = await axios.get(`${this.BASE_URL}/category/get-all`);
         return response.data;
     }
 
     static async getCategoryById(categoryId) {
-        const response = await axios.get(`${this.BASE_URL}/category/get-category-by-id/${categoryId}`)
+        const response = await axios.get(`${this.BASE_URL}/category/get-category-by-id/${categoryId}`);
         return response.data;
     }
 
-  
     static async updateCategory(categoryId, body) {
         const response = await axios.put(`${this.BASE_URL}/category/update/${categoryId}`, body, {
             headers: this.getHeader()
@@ -116,82 +127,91 @@ export default class ApiService {
             return response.data;
         } catch (error) {
             console.error("Error deleting category:", error.response ? error.response.data : error.message);
-            throw error; // Rethrow the error for handling in the component
+            throw error;
         }
     }
 
-    /**ORDERED */
+    /** ORDER API */
     static async createOrder(body) {
+        console.log("Order request body:", body);  // Log the request body
         const response = await axios.post(`${this.BASE_URL}/order/create`, body, {
             headers: this.getHeader()
-        })
+        });
         return response.data;
     }
 
     static async getAllOrders() {
         const response = await axios.get(`${this.BASE_URL}/order/filter`, {
             headers: this.getHeader()
-        })
+        });
         return response.data;
     }
 
     static async getOrderItemById(itemId) {
         const response = await axios.get(`${this.BASE_URL}/order/filter`, {
             headers: this.getHeader(),
-            params: {itemId}
-        })
+            params: { itemId }
+        });
         return response.data;
     }
 
     static async getAllOrderItemsByStatus(status) {
         const response = await axios.get(`${this.BASE_URL}/order/filter`, {
             headers: this.getHeader(),
-            params: {status}
-        })
+            params: { status }
+        });
         return response.data;
     }
 
-    static async updateOrderitemStatus(orderItemId, status) {
-        try {
-            const response = await axios.put(
-                `${this.BASE_URL}/order/update-item-status/${orderItemId}`,
-                {},
-                {
-                    headers: this.getHeader(),  // Include any necessary headers
-                    params: { status }          // Send the status as a query parameter
-                }
-            );
-            return response.data;
-        } catch (error) {
-            throw error;  // Pass the error to the calling function
-        }
+    static async updateOrderItemStatus(orderItemId, status) {
+        const response = await axios.put(`${this.BASE_URL}/order/update-item-status/${orderItemId}`, {}, {
+            headers: this.getHeader(),
+            params: { status }
+        });
+        return response.data;
     }
 
-    /**ADDRESS */
-    static async saveAddress(body) {
-        const response = await axios.post(`${this.BASE_URL}/address/save`, body, {
+    /** ORDER STATUS UPDATE */
+    static async updateOrderStatus(orderId, newStatus) {
+        const response = await axios.put(`${this.BASE_URL}/order/update-status/${orderId}`, 
+            { status: newStatus },
+            { headers: this.getHeader() }
+        );
+        return response.data;
+    }
+
+    /** ADDRESS API */
+    static async saveAddress(userId, addressDto) {
+        const response = await axios.post(`${this.BASE_URL}/api/addresses/${userId}`, addressDto, {
             headers: this.getHeader()
-        })
+        });
         return response.data;
     }
 
-    /***AUTHENTICATION CHECKER */
-    static logout(){
-        localStorage.removeItem('token')
-        localStorage.removeItem('role')
+    static async getAddressesByUser(userId) {
+        const response = await axios.get(`${this.BASE_URL}/api/addresses/user/${userId}`, {
+            headers: this.getHeader()
+        });
+        return response.data;
     }
 
-    static isAuthenticated(){
-        const token = localStorage.getItem('token')
-        return !!token
+    /** AUTHENTICATION CHECKER */
+    static logout() {
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
     }
 
-    static isAdmin(){
-        const role = localStorage.getItem('role')
-        return role === 'ADMIN'
+    static isAuthenticated() {
+        const token = localStorage.getItem("token");
+        return !!token;
     }
 
-    /** PAYMENT */
+    static isAdmin() {
+        const role = localStorage.getItem("role");
+        return role === "ADMIN";
+    }
+
+    /** PAYMENT API */
     static async chargeCard(paymentDetails) {
         const response = await axios.post(`${this.BASE_URL}/payment/charge`, paymentDetails, {
             headers: this.getHeader()

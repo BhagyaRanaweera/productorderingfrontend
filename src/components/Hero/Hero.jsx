@@ -14,6 +14,7 @@ import Testimonials from "../Testimonials/Testimonials";
 import Footer from "../Footer/Footer";
 import { useCart } from "../context/CartContext"; // Import cart context
 import { FaRobot } from "react-icons/fa";
+import BrandIcons from "../common/BrandIcons"; 
 
 const ImageList = [
   { id: 1, img: Image1, title: "Upto 50% off on all Men's Wear", description: "Good things come to those who shop!" },
@@ -161,7 +162,8 @@ const Home = () => {
   return (
     <div className="home dark:text-gray-300">
       <Hero handleOrderPopup={handleOrderPopup} />
-      <CountdownTimer saleEndTime={saleEndTime} />
+     {/* Add BrandIcons Component */}
+     <BrandIcons />
       
       {error ? (
         <p className="error-message dark:text-red-400">{error}</p>
@@ -174,6 +176,7 @@ const Home = () => {
 
       <Banner />
       <Subscribe />
+      <CountdownTimer saleEndTime={saleEndTime} />
       <Testimonials />
       <Footer />
 
