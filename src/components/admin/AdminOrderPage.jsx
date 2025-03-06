@@ -129,7 +129,7 @@ const AdminOrdersPage = () => {
                         {filteredOrders.map(order => (
                             <TableRow key={order.id}>
                                 <TableCell>{order.id}</TableCell>
-                                <TableCell>{order.user.name}</TableCell>
+                                <TableCell>{order.name}</TableCell>
                                 <TableCell>{order.status}</TableCell>
                                 <TableCell>${order.price.toFixed(2)}</TableCell>
                                 <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
