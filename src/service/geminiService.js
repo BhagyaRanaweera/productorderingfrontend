@@ -12,7 +12,7 @@ const predefinedResponses = {
   "Can I return a product?": "📦 Yes! We offer a 30-day return policy for all products.",
 };
 
-const generateResponse = async (question) => {
+const generateResponse = async (question, cartItemCount, cartItemNames, totalPrice, cart) => {
   const lowerCaseQuestion = question.toLowerCase();
 
   // Predefined responses for common queries
@@ -90,3 +90,5 @@ const generateResponse = async (question) => {
     return "I'm sorry, there was an error processing your request. Please try again later.";
   }
 };
+
+export default generateResponse;

@@ -110,9 +110,33 @@ const Home = () => {
     fetchProducts();
   }, [location.search, currentPage]);
 
-  const handleOrderPopup = () => {
-    console.log("Order Now button clicked");
-  };
+  
+
+const handleOrderPopup = () => {
+  // Filter products with price greater than 100
+  const filteredProducts = products.filter(product => product.price > 100);
+
+  if (filteredProducts.length === 0) {
+    alert("No products above $100 available for discount.");
+    return;
+  }
+
+  // Calculate discounted price
+  const totalOriginalPrice = filteredProducts.reduce((total, product) => total + product.price, 0);
+  const discount = totalOriginalPrice * 0.3; // 30% discount
+  const totalAfterDiscount = totalOriginalPrice - discount;
+
+  // Display the result
+  alert(
+    `Products eligible for discount:\n${filteredProducts.map(p => `${p.name} - $${p.price.toFixed(2)}`).join("\n")}
+    \nTotal Price: $${totalOriginalPrice.toFixed(2)}
+    \nDiscount (30%): -$${discount.toFixed(2)}
+    \nTotal After Discount: $${totalAfterDiscount.toFixed(2)}`
+  );
+
+  // Navigate to the Cart page
+  
+};
 
   // Function to generate real-time responses based on the user's question
   const generateResponse = (question) => {
