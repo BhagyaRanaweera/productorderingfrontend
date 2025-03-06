@@ -24,7 +24,7 @@ const ProfilePage = () => {
     const [addressForm, setAddressForm] = useState({
         street: "",
         city: "",
-        state: "",
+        district: "",
         zipCode: "",
         country: ""
     });
@@ -109,7 +109,7 @@ const ProfilePage = () => {
                         <Box>
                             <Typography><strong>Street:</strong> {userInfo.address.street}</Typography>
                             <Typography><strong>City:</strong> {userInfo.address.city}</Typography>
-                            <Typography><strong>State:</strong> {userInfo.address.state}</Typography>
+                            <Typography><strong>District:</strong> {userInfo.address.district}</Typography>
                             <Typography><strong>Zip Code:</strong> {userInfo.address.zipCode}</Typography>
                             <Typography><strong>Country:</strong> {userInfo.address.country}</Typography>
                         </Box>
@@ -188,7 +188,7 @@ const ProfilePage = () => {
                     <Typography variant="h6" gutterBottom>{userInfo.address ? "Edit Address" : "Add Address"}</Typography>
                     <TextField fullWidth label="Street" name="street" value={addressForm.street} onChange={handleAddressChange} sx={{ mb: 2 }} />
                     <TextField fullWidth label="City" name="city" value={addressForm.city} onChange={handleAddressChange} sx={{ mb: 2 }} />
-                    <TextField fullWidth label="State" name="state" value={addressForm.state} onChange={handleAddressChange} sx={{ mb: 2 }} />
+                    <TextField fullWidth label="District" name="district" value={addressForm.district} onChange={handleAddressChange} sx={{ mb: 2 }} />
                     <TextField fullWidth label="Zip Code" name="zipCode" value={addressForm.zipCode} onChange={handleAddressChange} sx={{ mb: 2 }} />
                     <TextField fullWidth label="Country" name="country" value={addressForm.country} onChange={handleAddressChange} sx={{ mb: 2 }} />
                     <Button variant="contained" color="primary" onClick={handleSaveAddress}>Save Address</Button>
