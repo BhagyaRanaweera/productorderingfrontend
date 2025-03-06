@@ -47,8 +47,10 @@ const App = () => {
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Hero />} />
+            {/* <Hero handleOrderPopup={handleOrderPopup} /> */}
+
             <Route path="/product/:productId" element={<ProductDetailsPage />} />
-            <Route path="/categories" element={<CategoryListPage />} />
+            {/* <Route path="/categories" element={<CategoryListPage />} /> */}
             <Route path="/category/:categoryId" element={<CategoryProductsPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/payment" element={<StripePaymentPage />} />

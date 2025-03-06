@@ -10,7 +10,7 @@ import Logo from "../../assets/logo.png";
 
 const Menu = [
   { id: 1, name: "Home", link: "/" },
-  { id: 2, name: "Categories", link: "/categories" },
+  { id: 2, name: "Categories", link: "/category/:categoryId" },
   { id: 3, name: "Cart", link: "/cart" },
 ];
 
